@@ -71,9 +71,9 @@ app.get('/scrape', function(req, res) {
 });
 
 //-------  Send this to mongoDB
-app.get('/articles/:id', function(req, res) {
+app.get('/articles', function(req, res) {
 
-	Article.findOne({'_id': req.params.id})
+	Article.findOne({})
 	.populate('note')
 	.exec(function(err, doc){
 		if (err){
