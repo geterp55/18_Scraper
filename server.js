@@ -70,13 +70,22 @@ app.get('/scrape', function(req, res) {
 	res.send("Scrape Complete");
 });
 
-//-------  Send this to mongoDB
+// this will get the articles we scraped from the mongoDB
 app.get('/articles', function(req, res) {
-
-	Article.findOne({})
-	.populate('note')
-	.exec(function(err, doc){
+	Article.find({}, function(err, doc) {
 		if (err){
+			console.log(err);
+		}
+		else {
+			res.json(doc);
+		}
+	});
+});
+
+// grab an article by it's ObjectId
+app.get('/articles/:id', function(req, res) {
+	Article.findOne({'_id': req.params.id}).populate('Note').exec(function(err, doc){
+		if(err) {
 			console.log(err);
 		}
 		else{
@@ -84,6 +93,52 @@ app.get('/articles', function(req, res) {
 		}
 	});
 });
+
+
+app.post('/articles/:id', function(req, res){
+	// create a new note and pass the req.body to the entry.
+	var newNote = new Note(req.body);
+
+	// and save the new note the db
+	newNote.save(function(err, doc){
+		// log any errors
+		if(err){
+			console.log(err);
+		} 
+		// otherwise
+		else {
+			// using the Article id passed in the id parameter of our url, 
+			// prepare a query that finds the matching Article in our db
+			// and update it to make it's lone note the one we just saved
+			Article.findOneAndUpdate({'_id': req.params.id}, {'Note':doc._id})
+			// execute the above query
+			.exec(function(err, doc){
+				// log any errors
+				if (err){
+					console.log(err);
+				} else {
+					// or send the document to the browser
+					res.send(doc);
+				}
+			});
+		}
+	});
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
